@@ -10,8 +10,10 @@
         ⁃	Password: devtest
 	2.	Run some of these scripts to populate the database
 
-    *** Create Database ***
+Create Database
+```
 CREATE DATABASE IF NOT EXISTS email
+```
 
 Create Users Table
 ```
