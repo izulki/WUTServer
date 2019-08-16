@@ -31,7 +31,7 @@ app.get("/email/auth/:address", (req, res) => {
 
 /*** RECEIVE EMAIL (GET): Unarchived ****/
 app.get("/email/:userid", (req, res) => {
-    let sql = `SELECT * FROM email.messages WHERE recipient_id = ${req.params.userid} AND archived = false`;
+    let sql = `SELECT * FROM email.messages INNER JOIN email.users ON email.messages.sender_id = email.users.user_id WHERE ${req.params.userid} AND archived = false`
     con.query(sql, function(err, result) {
       if (err) throw err;
       res.send(result);
@@ -40,11 +40,19 @@ app.get("/email/:userid", (req, res) => {
 
 /*** RECEIVE EMAIL (GET): Archived ****/
 app.get("/email/:userid/archived", (req, res) => {
-    let sql = `SELECT * FROM email.messages WHERE recipient_id = ${req.params.userid} AND archived = true`;
+    let sql = `SELECT * FROM email.messages, WHERE recipient_id = ${req.params.userid} AND archived = true`;
     con.query(sql, function(err, result) {
       if (err) throw err;
       res.send(result);
     });
   });
 
+/*** GET USER INFO ****/
+app.get("/email/user/:userid/", (req, res) => {
+  let sql = `SELECT * FROM email.users WHERE user_id = ${req.params.userid}`;
+  con.query(sql, function(err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
 
