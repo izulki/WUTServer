@@ -5,6 +5,10 @@ var mysql = require("mysql");
 const app = express();
 app.listen(3000, () => console.log("Example app listening on port 3000!"));
 
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
 /*** START of MySQL Connection Initialization ***/
 var con = mysql.createConnection({
   host: "localhost",
@@ -31,7 +35,7 @@ app.get("/email/auth/:address", (req, res) => {
 
 /*** RECEIVE EMAIL (GET): Unarchived ****/
 app.get("/email/:userid", (req, res) => {
-    let sql = `SELECT * FROM email.messages INNER JOIN email.users ON email.messages.sender_id = email.users.user_id WHERE ${req.params.userid} AND archived = false`
+    let sql = `SELECT * FROM email.messages INNER JOIN email.users ON email.messages.sender_id = email.users.user_id WHERE recipient_id = ${req.params.userid} AND archived = false`
     con.query(sql, function(err, result) {
       if (err) throw err;
       res.send(result);
@@ -40,7 +44,7 @@ app.get("/email/:userid", (req, res) => {
 
 /*** RECEIVE EMAIL (GET): Archived ****/
 app.get("/email/:userid/archived", (req, res) => {
-    let sql = `SELECT * FROM email.messages, WHERE recipient_id = ${req.params.userid} AND archived = true`;
+  let sql = `SELECT * FROM email.messages INNER JOIN email.users ON email.messages.sender_id = email.users.user_id WHERE recipient_id = ${req.params.userid} AND archived = true`
     con.query(sql, function(err, result) {
       if (err) throw err;
       res.send(result);
@@ -56,3 +60,20 @@ app.get("/email/user/:userid/", (req, res) => {
   });
 });
 
+/*** DELETE MESSAGE ****/
+app.post('/email/delete', function(req, res) {
+  let sql = `DELETE FROM email.messages WHERE id = ${req.body.message_id}`;
+  con.query(sql, function(err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
+
+/*** ARCHIVE MESSAGE ****/
+app.post('/email/archive', function(req, res) {
+  let sql = `UPDATE email.messages set archived = true WHERE id = ${req.body.message_id}`;
+  con.query(sql, function(err, result) {
+    if (err) throw err;
+    res.send(result);
+  });
+});
